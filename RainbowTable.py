@@ -49,3 +49,15 @@ def traverseChain(hashedPassword, start):
         if h.hexdigest() == hashedPassword:
             return start
         start = h.hexdigest()[:6]
+
+def test():
+    rainbowTable = createRainbowTable()
+    testPassword = ""
+    for _ in range(6):
+        testPassword += random.choice(string.ascii_lowercase)
+    h = hashlib.sha256()
+    h.update(testPassword)
+    hashedPassword = h.hexdigest()
+    return getPassword(hashedPassword, rainbowTable)
+
+test()
