@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
+#TODO: Write a reduction function
+#TODO: Figure out best chain length and number of chains for rainbow table
+
 import hashlib
 import random
 import string
+import csv
 
 def createRainbowTable():
     rainbowTable = {}
@@ -17,9 +21,13 @@ def createRainbowTable():
             hash = h.hexdigest()
             plainText = hash[:6]
         rainbowTable[start] = hash
-    return rainbowTable
+    with open('RainbowTable.csv', 'w') as table:
+        writer = csv.writer(table)
+        for start in rainbowTable:
+            writer.writerow(start + ',' + rainbowTable[start])
 
-def expandRainbowTable(rainbowTable):
+def expandRainbowTable():
+    rainbowTable = {}
     for _ in range(500):
         start = ""
         for _ in range(6):
@@ -31,13 +39,23 @@ def expandRainbowTable(rainbowTable):
             hash = h.hexdigest()
             plainText = hash[:6]
         rainbowTable[start] = hash
-    return rainbowTable
+    with open('RainbowTable.csv', 'a') as table:
+        writer = csv.writer(table)
+        for start in rainbowTable:
+            writer.writerow(start + ',' + rainbowTable[start])
 
-def getPassword(hashedPassword, rainbowTable):
-    while True:
+def getPassword(hashedPassword):
+    rainbowTable = {}
+    with open('RainbowTable.csv', 'r') as table:
+        reader = csv.reader(table)
+        for row in reader:
+            start = "".join(row[:6])
+            hash = "".join(row[7:])
+            rainbowTable[start] = hash
+    for _ in range(100000):
         for start in rainbowTable:
             if rainbowTable[start] == hashedPassword:
-                return traverseChain(hashedPassword, rainbowTable, start)
+                return traverseChain(hashedPassword, start)
         h = hashlib.sha256()
         h.update(hashedPassword[:6])
         hashedPassword = h.hexdigest()
@@ -50,14 +68,15 @@ def traverseChain(hashedPassword, start):
             return start
         start = h.hexdigest()[:6]
 
-def test():
-    rainbowTable = createRainbowTable()
-    testPassword = ""
-    for _ in range(6):
-        testPassword += random.choice(string.ascii_lowercase)
+def test(testPassword = None):
+    if testPassword is None:
+        testPassword = ""
+        for _ in range(6):
+            testPassword += random.choice(string.ascii_lowercase)
     h = hashlib.sha256()
     h.update(testPassword)
     hashedPassword = h.hexdigest()
-    return getPassword(hashedPassword, rainbowTable)
+    print getPassword(hashedPassword)
 
-test()
+
+test("jialin")
