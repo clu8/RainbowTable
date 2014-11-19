@@ -11,14 +11,15 @@ import time
 
 def createRainbowTable():
     rainbowTable = {}
-    for i in range(5000):
-        print i
+    for i in range(25000):
+        if i%5 == 0:
+            print i
         start = ""
         for _ in range(6):
             start += random.choice(string.ascii_lowercase)
         plainText = start
         hash = ""
-        for _ in range(100000):
+        for _ in range(20000):
             h = hashlib.sha256()
             h.update(plainText)
             hash = h.hexdigest()
@@ -31,14 +32,15 @@ def createRainbowTable():
 
 def expandRainbowTable():
     rainbowTable = {}
-    for i in range(500):
-        print i
+    for i in range(25000):
+        if i%5 == 0:
+            print i
         start = ""
         for _ in range(6):
             start += random.choice(string.ascii_lowercase)
         plainText = start
         hash = ""
-        for _ in range(100000):
+        for _ in range(20000):
             h = hashlib.sha256()
             h.update(plainText)
             hash = h.hexdigest()
@@ -58,22 +60,27 @@ def getPassword(hashedPassword):
             hash = "".join(row[7:])
             rainbowTable[start] = hash
     candidate = hashedPassword
-    for _ in range(100000):
+    for i in range(20000):
+        if i%50 == 0:
+            print i
         for start in rainbowTable:
             if rainbowTable[start] == candidate:
-                return traverseChain(hashedPassword, start)
+                traversalResult = traverseChain(hashedPassword, start)
+                if traversalResult != 0:
+                    return traversalResult
         h = hashlib.sha256()
         h.update(reduction(candidate))
         candidate = h.hexdigest()
 
 def traverseChain(hashedPassword, start):
-    for _ in range(100000):
+    print "traverse"
+    for _ in range(20000):
         h = hashlib.sha256()
         h.update(start)
         if h.hexdigest() == hashedPassword:
             return start
         start = reduction(h.hexdigest())
-    return "not found"
+    return 0
 
 # This is the stupidest piece of code I've ever written
 def reduction(hash):
@@ -151,5 +158,4 @@ def test(testPassword = None):
     duration = end - start
     print "duration of search: " + str(int(duration/60)) + " min, " + str(duration%60) + " sec"
 
-
-test() # consistently returns not found
+test()
