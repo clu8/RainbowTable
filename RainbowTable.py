@@ -89,59 +89,7 @@ def reduction(hash):
         x = hash[i:i+2]
         x = 10*int(x[0], 16) + int(x[1], 16)
         x = x%26
-
-        if x == 0:
-            plainText += 'a'
-        if x == 1:
-            plainText += 'b'
-        if x == 2:
-            plainText += 'c'
-        if x == 3:
-            plainText += 'd'
-        if x == 4:
-            plainText += 'e'
-        if x == 5:
-            plainText += 'f'
-        if x == 6:
-            plainText += 'g'
-        if x == 7:
-            plainText += 'h'
-        if x == 8:
-            plainText += 'i'
-        if x == 9:
-            plainText += 'j'
-        if x == 10:
-            plainText += 'k'
-        if x == 11:
-            plainText += 'l'
-        if x == 12:
-            plainText += 'm'
-        if x == 13:
-            plainText += 'n'
-        if x == 14:
-            plainText += 'o'
-        if x == 15:
-            plainText += 'p'
-        if x == 16:
-            plainText += 'q'
-        if x == 17:
-            plainText += 'r'
-        if x == 18:
-            plainText += 's'
-        if x == 19:
-            plainText += 't'
-        if x == 20:
-            plainText += 'u'
-        if x == 21:
-            plainText += 'v'
-        if x == 22:
-            plainText += 'w'
-        if x == 23:
-            plainText += 'x'
-        if x == 24:
-            plainText += 'y'
-        if x == 25:
-            plainText += 'z'
+        plainText += string.lowercase[x]
     return plainText
 
 def test(testPassword = None):
