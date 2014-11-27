@@ -13,7 +13,7 @@ def createRainbowTable():
     rainbowTable = {}
     for i in range(25000):
         if i%5 == 0:
-            print i
+            print(i)
         start = ""
         for _ in range(6):
             start += random.choice(string.ascii_lowercase)
@@ -32,7 +32,7 @@ def expandRainbowTable():
     rainbowTable = {}
     for i in range(25000):
         if i%5 == 0:
-            print i
+            print(i)
         start = ""
         for _ in range(6):
             start += random.choice(string.ascii_lowercase)
@@ -58,7 +58,7 @@ def getPassword(hashedPassword):
     candidate = hashedPassword
     for i in range(20000):
         if i%50 == 0:
-            print i
+            print(i)
         for start in rainbowTable:
             if rainbowTable[start] == candidate:
                 traversalResult = traverseChain(hashedPassword, start)
@@ -67,7 +67,7 @@ def getPassword(hashedPassword):
         candidate = hashlib.sha256(reduction(candidate)).hexdigest()
 
 def traverseChain(hashedPassword, start):
-    print("traverse")
+    # print("traverse") costs a lot of running time
     for _ in range(20000):
         hash = hashlib.sha256(start).hexdigest()
         if hash == hashedPassword:
@@ -92,8 +92,8 @@ def test(testPassword = None):
 
     hashedPassword = hashlib.sha256(testPassword).hexdigest()
 
-    print("Cracked password: %s") % getPassword(hashedPassword)
+    print(("Cracked password: %s") % getPassword(hashedPassword))
     elapsed = time.time() - start
-    print("Elapsed: %s mins, %s secs.") % (str(int(duration/60)), str(duration%60))
+    print(("Elapsed: %s mins, %s secs.") % (str(int(duration/60)), str(duration%60)))
 
 test('tester')
