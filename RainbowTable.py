@@ -20,9 +20,7 @@ def createRainbowTable():
         plainText = start
         hash = ""
         for _ in range(20000):
-            h = hashlib.sha256()
-            h.update(plainText)
-            hash = h.hexdigest()
+            hash = hashlib.sha256(plainText).hexdigest()
             plainText = reduction(hash)
         rainbowTable[start] = hash
     with open('RainbowTable.csv', 'w') as table:
@@ -41,9 +39,7 @@ def expandRainbowTable():
         plainText = start
         hash = ""
         for _ in range(20000):
-            h = hashlib.sha256()
-            h.update(plainText)
-            hash = h.hexdigest()
+            hash = hashlib.sha256(plainText).hexdigest()
             plainText = reduction(hash)
         rainbowTable[start] = hash
     with open('RainbowTable.csv', 'a') as table:
@@ -68,42 +64,36 @@ def getPassword(hashedPassword):
                 traversalResult = traverseChain(hashedPassword, start)
                 if traversalResult != 0:
                     return traversalResult
-        h = hashlib.sha256()
-        h.update(reduction(candidate))
-        candidate = h.hexdigest()
+        candidate = hashlib.sha256(reduction(candidate)).hexdigest()
 
 def traverseChain(hashedPassword, start):
-    print "traverse"
+    print("traverse")
     for _ in range(20000):
-        h = hashlib.sha256()
-        h.update(start)
-        if h.hexdigest() == hashedPassword:
+        hash = hashlib.sha256(start).hexdigest()
+        if hash == hashedPassword:
             return start
-        start = reduction(h.hexdigest())
+        start = reduction(hash)
     return 0
 
-# This is the stupidest piece of code I've ever written
 def reduction(hash):
     plainText = ""
     for i in range(6):
-        x = hash[i:i+2]
-        x = 10*int(x[0], 16) + int(x[1], 16)
-        x = x%26
-        plainText += string.lowercase[x]
+        x = (10*int(hash[i], 16) + int(hash[i+1], 16)) % 26
+        plainText += string.lowercase[x] #abcdef...z
     return plainText
 
 def test(testPassword = None):
     start = time.time()
+
     if testPassword is None:
         testPassword = ""
         for _ in range(6):
             testPassword += random.choice(string.ascii_lowercase)
-    h = hashlib.sha256()
-    h.update(testPassword)
-    hashedPassword = h.hexdigest()
-    print getPassword(hashedPassword)
-    end = time.time()
-    duration = end - start
-    print "duration of search: " + str(int(duration/60)) + " min, " + str(duration%60) + " sec"
 
-test()
+    hashedPassword = hashlib.sha256(testPassword).hexdigest()
+
+    print("Cracked password: %s") % getPassword(hashedPassword)
+    elapsed = time.time() - start
+    print("Elapsed: %s mins, %s secs.") % (str(int(duration/60)), str(duration%60))
+
+test('tester')
