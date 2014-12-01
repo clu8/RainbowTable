@@ -9,9 +9,11 @@ import string
 import csv
 import time
 
+chainLength = 4000
+
 def createRainbowTable():
     rainbowTable = {}
-    for i in range(25000):
+    for i in range(100000):
         if i%5 == 0:
             print(i)
         start = ""
@@ -19,9 +21,9 @@ def createRainbowTable():
             start += random.choice(string.ascii_lowercase)
         plainText = start
         hash = ""
-        for _ in range(20000):
+        for col in range(chainLength):
             hash = hashlib.sha256(plainText).hexdigest()
-            plainText = reduction(hash)
+            plainText = reduction(hash, col)
         rainbowTable[start] = hash
     with open('RainbowTable.csv', 'w') as table:
         writer = csv.writer(table)
@@ -38,9 +40,9 @@ def expandRainbowTable():
             start += random.choice(string.ascii_lowercase)
         plainText = start
         hash = ""
-        for _ in range(20000):
+        for col in range(chainLength):
             hash = hashlib.sha256(plainText).hexdigest()
-            plainText = reduction(hash)
+            plainText = reduction(hash, col)
         rainbowTable[start] = hash
     with open('RainbowTable.csv', 'a') as table:
         writer = csv.writer(table)
@@ -56,29 +58,30 @@ def getPassword(hashedPassword):
             hash = "".join(row[7:])
             rainbowTable[start] = hash
     candidate = hashedPassword
-    for i in range(20000):
-        if i%50 == 0:
-            print(i)
-        for start in rainbowTable:
-            if rainbowTable[start] == candidate:
-                traversalResult = traverseChain(hashedPassword, start)
-                if traversalResult != 0:
-                    return traversalResult
-        candidate = hashlib.sha256(reduction(candidate)).hexdigest()
+    for col in range(chainLength):
+        for column in range(col, chainLength+1):
+            if column%50 == 0:
+                print(column)
+            for start in rainbowTable:
+                if rainbowTable[start] == candidate:
+                    traversalResult = traverseChain(hashedPassword, start)
+                    if traversalResult != 0:
+                        return traversalResult
+            candidate = hashlib.sha256(reduction(candidate, column)).hexdigest()
 
 def traverseChain(hashedPassword, start):
     # print("traverse") costs a lot of running time
-    for _ in range(20000):
+    for col in range(chainLength):
         hash = hashlib.sha256(start).hexdigest()
         if hash == hashedPassword:
             return start
-        start = reduction(hash)
+        start = reduction(hash, col)
     return 0
 
-def reduction(hash):
+def reduction(hash, col):
     plainText = ""
     for i in range(6):
-        x = (10*int(hash[i], 16) + int(hash[i+1], 16)) % 26
+        x = ((10*int(hash[i], 16) + int(hash[i+1], 16)) + col) % 26
         plainText += string.lowercase[x] #abcdef...z
     return plainText
 
@@ -93,7 +96,7 @@ def test(testPassword = None):
     hashedPassword = hashlib.sha256(testPassword).hexdigest()
 
     print(("Cracked password: %s") % getPassword(hashedPassword))
-    elapsed = time.time() - start
+    duration = time.time() - start
     print(("Elapsed: %s mins, %s secs.") % (str(int(duration/60)), str(duration%60)))
 
 test('tester')
