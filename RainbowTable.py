@@ -19,8 +19,7 @@ def createRainbowTable():
         plainText = start
         hash = ""
         for col in range(CHAIN_LENGTH):
-            hash = hashlib.sha256(bytes(plainText, 'utf-8')).hexdigest()
-            plainText = reduction(hash, col)
+            plainText = R(H(plainText), col)
         rainbowTable[start] = hash
     with open('RainbowTable.csv', 'w') as table:
         writer = csv.writer(table)
@@ -38,8 +37,7 @@ def expandRainbowTable():
         plainText = start
         hash = ""
         for col in range(CHAIN_LENGTH):
-            hash = hashlib.sha256(bytes(plainText, 'utf-8')).hexdigest()
-            plainText = reduction(hash, col)
+            plainText = R(H(plainText), col)
         rainbowTable[start] = hash
     with open('RainbowTable.csv', 'a') as table:
         writer = csv.writer(table)
@@ -64,24 +62,34 @@ def crack(hashedPassword):
                     traversalResult = traverseChain(hashedPassword, start)
                     if traversalResult != 0:
                         return traversalResult
-            candidate = hashlib.sha256(bytes(reduction(candidate, column), 'utf-8')).hexdigest()
+            candidate = H(R(candidate, column))
 
 def traverseChain(hashedPassword, start):
     print("traverse")
     for col in range(CHAIN_LENGTH):
-        hash = hashlib.sha256(start).hexdigest()
+        hash = H(start)
         if hash == hashedPassword:
             return start
-        start = reduction(hash, col)
+        start = R(hash, col)
     return 0
 
-def reduction(hash, col):
+# Hash function
+# Precondition: Input plaintext as string
+# Postcondition: Returns hash as string
+def H(plaintext):
+    return hashlib.sha256(bytes(plaintext, 'utf-8')).hexdigest()
+
+# Reduction function
+# Precondition: hash is H(previousPlaintext)
+# Postcondition: returns randomly distributed 6-digit lowercase plaintext password
+def R(hash, col):
     plainText = ""
     for i in range(6):
         x = ((10*int(hash[i], 16) + int(hash[i+1], 16)) + col) % 26
         plainText += string.ascii_lowercase[x] #abcdef...z
     return plainText
 
+# Test a 6 digit password
 def test(password = ""):
     start = time.time()
 
@@ -89,9 +97,7 @@ def test(password = ""):
         for _ in range(6):
             password += random.choice(string.ascii_lowercase)
 
-    hashedPassword = hashlib.sha256(bytes(password, 'utf-8')).hexdigest()
-
-    print("Cracked password: {0}".format(crack(hashedPassword)))
+    print("Cracked password: {0}".format(crack(H(password))))
     elapsed = time.time() - start
     print("Elapsed: {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
 
