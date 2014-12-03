@@ -8,23 +8,27 @@ import string
 import csv
 import time
 
-CHAIN_LENGTH = 4000
-TABLE_FILE = "RainbowTable.csv"
+CHAIN_LENGTH = 4000 # 4000
+ROWS = 10 # 100000
+TABLE_FILE = "table.csv" # "RainbowTable.csv" for final, "table.csv" for testing
 TABLE_FIELDNAMES = ['start_point', 'endpoint_hash']
 
 def createRainbowTable():
     rainbowTable = {}
-    for i in range(100000):
-        if i%5 == 0:
+    for i in range(ROWS):
+        if i % 5 == 0:
             print(i)
+
         start = ""
         for _ in range(6):
             start += random.choice(string.ascii_lowercase)
+
         plainText = start
-        hash = ""
         for col in range(CHAIN_LENGTH):
-            plainText = R(H(plainText), col)
+            hash = H(plainText)
+            plainText = R(hash, col)
         rainbowTable[start] = hash
+
     with open(TABLE_FILE, 'w') as table:
         writer = csv.DictWriter(table, fieldnames=TABLE_FIELDNAMES)
         writer.writeheader()
@@ -108,5 +112,3 @@ def test(password = ""):
     print("Cracked password: {0}".format(crack(H(password))))
     elapsed = time.time() - start
     print("Elapsed: {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
-
-test('tester')
