@@ -17,7 +17,7 @@ import csv
 import time
 
 CHAIN_LENGTH = 1000
-ROWS = 1000
+ROWS = 3 * 10**6
 TABLE_FILE = "RainbowTable.csv"
 TABLE_FIELDNAMES = ['start_point', 'endpoint_hash']
 
