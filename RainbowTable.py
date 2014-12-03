@@ -68,7 +68,7 @@ def crack(hashedPassword):
 
     candidate = hashedPassword
     for col in range(CHAIN_LENGTH):
-        for column in range(col, CHAIN_LENGTH+1):
+        for column in range(col, CHAIN_LENGTH):
             if column%50 == 0:
                 print(column)
             for start in rainbowTable:
