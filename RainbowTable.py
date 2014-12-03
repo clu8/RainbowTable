@@ -9,73 +9,61 @@ import csv
 import time
 
 CHAIN_LENGTH = 1000
-ROWS = 1000 #3000000
+ROWS = 1000 # 3 * 10**6
 TABLE_FILE = "table.csv" # "RainbowTable.csv" for final, "table.csv" for testing
 TABLE_FIELDNAMES = ['start_point', 'endpoint_hash']
 
-def createRainbowTable():
+# Creates rainbow table using H() and R(), given ROWS, CHAIN_LENGTH, and TABLE_FILE
+# Precondition: To expand, input number of rows as param expand; otherwise previous table will be erased
+def createRainbowTable(expandRows = None):
     startTime = time.time()
 
-    rainbowTable = {}
-    for i in range(ROWS):
-        if i % 1000 == 0:
-            print(i)
+    if expandRows:
+        rows = expandRows
+        flag = 'a'
+    else:
+        rows = ROWS
+        flag = 'w'
 
-        start = ""
-        for _ in range(6):
-            start += random.choice(string.ascii_lowercase)
-
-        plainText = start
-        for col in range(CHAIN_LENGTH):
-            hash = H(plainText)
-            plainText = R(hash, col)
-        rainbowTable[start] = hash
-
-    with open(TABLE_FILE, 'w') as table:
+    with open(TABLE_FILE, flag) as table:
         writer = csv.DictWriter(table, fieldnames=TABLE_FIELDNAMES)
         writer.writeheader()
-        for start in rainbowTable:
-            writer.writerow({TABLE_FIELDNAMES[0]: start, TABLE_FIELDNAMES[1]: rainbowTable[start]})
+        for i in range(rows):
+            if i % 1000 == 0:
+                print(i)
+
+            start = ""
+            for _ in range(6):
+                start += random.choice(string.ascii_lowercase)
+
+            plainText = start
+            for col in range(CHAIN_LENGTH):
+                hash = H(plainText)
+                plainText = R(hash, col)
+            writer.writerow({TABLE_FIELDNAMES[0]: start, TABLE_FIELDNAMES[1]: hash})
 
     elapsed = time.time() - startTime
     print("Done in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
-
-def expandRainbowTable():
-    rainbowTable = {}
-    for i in range(25000):
-        if i%5 == 0:
-            print(i)
-        start = ""
-        for _ in range(6):
-            start += random.choice(string.ascii_lowercase)
-        plainText = start
-        hash = ""
-        for col in range(CHAIN_LENGTH):
-            plainText = R(H(plainText), col)
-        rainbowTable[start] = hash
-    with open(TABLE_FILE, 'a') as table:
-        writer = csv.DictWriter(table, fieldnames=TABLE_FIELDNAMES)
-        writer.writeheader()
-        for start in rainbowTable:
-            writer.writerow({TABLE_FIELDNAMES[0]: start, TABLE_FIELDNAMES[1]: rainbowTable[start]})
 
 def crack(hashedPassword):
     rainbowTable = {}
     with open(TABLE_FILE, 'r') as table:
         reader = csv.DictReader(table)
         for row in reader:
-            rainbowTable[row[TABLE_FIELDNAMES[0]]] = row[TABLE_FIELDNAMES[1]]
+            rainbowTable[row[TABLE_FIELDNAMES[1]]] = row[TABLE_FIELDNAMES[0]]
+            # rainbowTable: keys are endpoint hashes, values are start plaintexts
 
     candidate = hashedPassword
     for col in range(CHAIN_LENGTH):
         for column in range(col, CHAIN_LENGTH):
-            if column%50 == 0:
+            if column % 50 == 0:
                 print(column)
-            for start in rainbowTable:
-                if rainbowTable[start] == candidate:
-                    traversalResult = traverseChain(hashedPassword, start)
-                    if traversalResult != 0:
-                        return traversalResult
+
+            if candidate in rainbowTable:
+                traversalResult = traverseChain(hashedPassword, rainbowTable[candidate])
+                if traversalResult != 0:
+                    return traversalResult
+
             candidate = H(R(candidate, column))
 
 def traverseChain(hashedPassword, start):
@@ -97,7 +85,7 @@ def H(plaintext):
 # Precondition: hash is H(previousPlaintext)
 # Postcondition: returns randomly distributed 6-digit lowercase plaintext password
 def R(hash, col):
-    plaintextKey = (int(hash, 16) ^ col) % 308915776 # 26**6
+    plaintextKey = (int(hash[:9], 16) ^ col) % 308915776 # 26**6
     plaintext = ""
     for _ in range(6):
         plaintext += string.ascii_lowercase[plaintextKey % 26]
