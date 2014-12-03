@@ -8,8 +8,8 @@ import string
 import csv
 import time
 
-CHAIN_LENGTH = 4000 # 4000
-ROWS = 100 # 100000
+CHAIN_LENGTH = 1000
+ROWS = 1000 #3000000
 TABLE_FILE = "table.csv" # "RainbowTable.csv" for final, "table.csv" for testing
 TABLE_FIELDNAMES = ['start_point', 'endpoint_hash']
 
@@ -18,7 +18,7 @@ def createRainbowTable():
 
     rainbowTable = {}
     for i in range(ROWS):
-        if i % 5 == 0:
+        if i % 1000 == 0:
             print(i)
 
         start = ""
