@@ -73,8 +73,8 @@ def crack(hashedPassword):
     if len(rainbowTable) == 0:
         load_rainbow_table()
 
-    candidate = hashedPassword
     for col in range(CHAIN_LENGTH):
+        candidate = hashedPassword
         for column in range(col, CHAIN_LENGTH):
             if column % 1000 == 0:
                 print(column)
@@ -104,7 +104,7 @@ Precondition: Input plaintext as string
 Postcondition: Returns hash as string
 """
 def H(plaintext):
-    return hashlib.sha256(bytes(plaintext, 'utf-8')).hexdigest()
+    return hashlib.sha256(bytes(plaintext, 'utf8')).hexdigest()
 
 """Reduction function
 Precondition: hash is H(previousPlaintext)
@@ -133,3 +133,5 @@ def test(password=""):
     print("Cracked password: {0}".format(crack(H(password))))
     elapsed = time.time() - start
     print("Done in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
+
+test("jialin")
