@@ -9,11 +9,13 @@ import csv
 import time
 
 CHAIN_LENGTH = 4000 # 4000
-ROWS = 10 # 100000
+ROWS = 100 # 100000
 TABLE_FILE = "table.csv" # "RainbowTable.csv" for final, "table.csv" for testing
 TABLE_FIELDNAMES = ['start_point', 'endpoint_hash']
 
 def createRainbowTable():
+    startTime = time.time()
+
     rainbowTable = {}
     for i in range(ROWS):
         if i % 5 == 0:
@@ -34,6 +36,9 @@ def createRainbowTable():
         writer.writeheader()
         for start in rainbowTable:
             writer.writerow({TABLE_FIELDNAMES[0]: start, TABLE_FIELDNAMES[1]: rainbowTable[start]})
+
+    elapsed = time.time() - startTime
+    print("Done in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
 
 def expandRainbowTable():
     rainbowTable = {}
@@ -112,4 +117,4 @@ def test(password = ""):
 
     print("Cracked password: {0}".format(crack(H(password))))
     elapsed = time.time() - start
-    print("Elapsed: {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
+    print("Done in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
