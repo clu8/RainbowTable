@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Use Python 3
+
 import hashlib
 import random
 import string
@@ -7,6 +9,8 @@ import csv
 import time
 
 CHAIN_LENGTH = 4000
+TABLE_FILE = "RainbowTable.csv"
+TABLE_FIELDNAMES = ['start_point', 'endpoint_hash']
 
 def createRainbowTable():
     rainbowTable = {}
@@ -21,10 +25,11 @@ def createRainbowTable():
         for col in range(CHAIN_LENGTH):
             plainText = R(H(plainText), col)
         rainbowTable[start] = hash
-    with open('RainbowTable.csv', 'w') as table:
-        writer = csv.writer(table)
+    with open(TABLE_FILE, 'w') as table:
+        writer = csv.DictWriter(table, fieldnames=TABLE_FIELDNAMES)
+        writer.writeheader()
         for start in rainbowTable:
-            writer.writerow(start + ',' + rainbowTable[start])
+            writer.writerow({TABLE_FIELDNAMES[0]: start, TABLE_FIELDNAMES[1]: rainbowTable[start]})
 
 def expandRainbowTable():
     rainbowTable = {}
@@ -39,19 +44,19 @@ def expandRainbowTable():
         for col in range(CHAIN_LENGTH):
             plainText = R(H(plainText), col)
         rainbowTable[start] = hash
-    with open('RainbowTable.csv', 'a') as table:
-        writer = csv.writer(table)
+    with open(TABLE_FILE, 'a') as table:
+        writer = csv.DictWriter(table, fieldnames=TABLE_FIELDNAMES)
+        writer.writeheader()
         for start in rainbowTable:
-            writer.writerow(start + ',' + rainbowTable[start])
+            writer.writerow({TABLE_FIELDNAMES[0]: start, TABLE_FIELDNAMES[1]: rainbowTable[start]})
 
 def crack(hashedPassword):
     rainbowTable = {}
-    with open('RainbowTable.csv', 'r') as table:
-        reader = csv.reader(table)
+    with open(TABLE_FILE, 'r') as table:
+        reader = csv.DictReader(table)
         for row in reader:
-            start = "".join(row[:6])
-            hash = "".join(row[7:])
-            rainbowTable[start] = hash
+            rainbowTable[row[TABLE_FIELDNAMES[0]]] = row[TABLE_FIELDNAMES[1]]
+
     candidate = hashedPassword
     for col in range(CHAIN_LENGTH):
         for column in range(col, CHAIN_LENGTH+1):
@@ -89,13 +94,16 @@ def R(hash, col):
         plainText += string.ascii_lowercase[x] #abcdef...z
     return plainText
 
-# Test a 6 digit password
+# Precondition: Input a 6 digit lowercase password to test, or input no arguments to generate a random password
+# Postcondition: Cracks H(password) and prints elapsed time
 def test(password = ""):
     start = time.time()
 
     if password == "":
         for _ in range(6):
             password += random.choice(string.ascii_lowercase)
+
+    print("Cracking password: {0}\nH(password): {1}".format(password, H(password)))
 
     print("Cracked password: {0}".format(crack(H(password))))
     elapsed = time.time() - start
