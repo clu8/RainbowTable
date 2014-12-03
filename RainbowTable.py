@@ -76,16 +76,17 @@ def crack(hashedPassword):
     if len(rainbowTable) == 0:
         load_rainbow_table()
 
+    print("Cracking hash...")
+    startTime = time.time()
+
     for col in range(CHAIN_LENGTH):
         candidate = hashedPassword
         for column in range(col, CHAIN_LENGTH):
-            if column % 1000 == 0:
-                print(column)
-
             if candidate in rainbowTable:
-                print("Found chain! Traversing...")
                 traversalResult = traverse_chain(hashedPassword, rainbowTable[candidate])
                 if traversalResult:
+                    elapsed = time.time() - start
+                    print("Done cracking in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
                     return traversalResult
 
             candidate = H(R(candidate, column))
@@ -133,6 +134,8 @@ def test(password=""):
 
     print("Cracking password: {0}\nH(password): {1}".format(password, H(password)))
 
-    print("Cracked password: {0}".format(crack(H(password))))
-    elapsed = time.time() - start
-    print("Done in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
+    cracked = crack(H(password))
+    if cracked:
+        print("Cracked password: {0}".format(crack(H(password))))
+    else:
+        print("Unsuccessful :(")
