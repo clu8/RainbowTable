@@ -20,6 +20,7 @@ CHAIN_LENGTH = 1000
 ROWS = 3 * 10**6
 TABLE_FILE = "RainbowTable.csv"
 TABLE_FIELDNAMES = ['start_point', 'endpoint_hash']
+rainbowTable = {}
 
 """Creates rainbow table using H() and R() with ROWS of CHAIN_LENGTH in TABLE_FILE
 Precondition: To expand, input number of rows as param expand
@@ -58,18 +59,24 @@ def create_rainbow_table(expandRows=None):
     elapsed = time.time() - startTime
     print("Done in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
 
-def crack(hashedPassword):
-    rainbowTable = {}
+def load_rainbow_table():
+    print("Loading rainbow table...")
+    startTime = time.time()
     with open(TABLE_FILE, 'r') as table:
         reader = csv.DictReader(table)
         for row in reader:
             rainbowTable[row[TABLE_FIELDNAMES[1]]] = row[TABLE_FIELDNAMES[0]]
             # rainbowTable: keys are endpoint hashes, values are start plaintexts
+    print("Done loading in {0} secs.".format(time.time() - startTime))
+
+def crack(hashedPassword):
+    if len(rainbowTable) == 0:
+        load_rainbow_table()
 
     candidate = hashedPassword
     for col in range(CHAIN_LENGTH):
         for column in range(col, CHAIN_LENGTH):
-            if column % 50 == 0:
+            if column % 1000 == 0:
                 print(column)
 
             if candidate in rainbowTable:
