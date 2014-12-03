@@ -59,14 +59,17 @@ def create_rainbow_table(expandRows=None):
     elapsed = time.time() - startTime
     print("Done in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
 
+'''Clears any existing rainbow table loaded into memory and reloads it from TABLE_FILE.
+Keys are endpoint hashes, values are start plaintexts.
+'''
 def load_rainbow_table():
+    rainbowTable.clear()
     print("Loading rainbow table...")
     startTime = time.time()
     with open(TABLE_FILE, 'r') as table:
         reader = csv.DictReader(table)
         for row in reader:
             rainbowTable[row[TABLE_FIELDNAMES[1]]] = row[TABLE_FIELDNAMES[0]]
-            # rainbowTable: keys are endpoint hashes, values are start plaintexts
     print("Done loading in {0} secs.".format(time.time() - startTime))
 
 def crack(hashedPassword):
@@ -80,6 +83,7 @@ def crack(hashedPassword):
                 print(column)
 
             if candidate in rainbowTable:
+                print("Found chain! Traversing...")
                 traversalResult = traverse_chain(hashedPassword, rainbowTable[candidate])
                 if traversalResult:
                     return traversalResult
@@ -90,7 +94,6 @@ def crack(hashedPassword):
 Postcondition: Returns plaintext password if successful; otherwise returns None
 """
 def traverse_chain(hashedPassword, start):
-    print("Traversing...")
     for col in range(CHAIN_LENGTH):
         hash = H(start)
         if hash == hashedPassword:
