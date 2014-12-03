@@ -85,8 +85,7 @@ def crack(hashedPassword):
             if candidate in rainbowTable:
                 traversalResult = traverse_chain(hashedPassword, rainbowTable[candidate])
                 if traversalResult:
-                    elapsed = time.time() - start
-                    print("Done cracking in {0} mins, {1} secs.".format(int(elapsed / 60), elapsed % 60))
+                    print("Done cracking in {0} secs.".format(time.time() - startTime))
                     return traversalResult
 
             candidate = H(R(candidate, column))
