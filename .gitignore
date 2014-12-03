@@ -53,5 +53,11 @@ docs/_build/
 # PyBuilder
 target/
 
+# IntelliJ IDEA
+.idea/
+
+# Mac
+.DS_Store
+
 # RainbowTable
 *.csv
