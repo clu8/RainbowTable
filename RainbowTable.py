@@ -97,7 +97,7 @@ def H(plaintext):
 # Precondition: hash is H(previousPlaintext)
 # Postcondition: returns randomly distributed 6-digit lowercase plaintext password
 def R(hash, col):
-    plaintextKey = int(hash, 16) ^ col % 308915776 # 26**6
+    plaintextKey = (int(hash, 16) ^ col) % 308915776 # 26**6
     plaintext = ""
     for _ in range(6):
         plaintext += string.ascii_lowercase[plaintextKey % 26]
