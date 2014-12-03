@@ -92,11 +92,12 @@ def H(plaintext):
 # Precondition: hash is H(previousPlaintext)
 # Postcondition: returns randomly distributed 6-digit lowercase plaintext password
 def R(hash, col):
-    plainText = ""
-    for i in range(6):
-        x = ((10*int(hash[i], 16) + int(hash[i+1], 16)) + col) % 26
-        plainText += string.ascii_lowercase[x] #abcdef...z
-    return plainText
+    plaintextKey = int(hash, 16) ^ col % 308915776 # 26**6
+    plaintext = ""
+    for _ in range(6):
+        plaintext += string.ascii_lowercase[plaintextKey % 26]
+        plaintextKey //= 26
+    return plaintext
 
 # Precondition: Input a 6 digit lowercase password to test, or input no arguments to generate a random password
 # Postcondition: Cracks H(password) and prints elapsed time
