@@ -5,7 +5,7 @@ Rainbow table attack
 Jialin Ding (jding09@stanford.edu) and Charles Lu (charleslu@stanford.edu)
 CS 55N Autumn 2014 with Dan Boneh
 ----------------------------------------------------------------------------
-Contains functionality to create a rainbow table and crack a hash for 6-digit passwords.
+Contains functionality to create a rainbow table and crack a hash for 6-digit lowercase passwords.
 """
 
 # Use Python 3
@@ -23,8 +23,9 @@ ROWS = 3 * 10**6
 CSV_FILE = "RainbowTable.csv"
 CSV_FIELDNAMES = ['start_point', 'endpoint_hash']
 PICKLE_FILE = "RainbowTable.pickle"
+RAINBOW_TABLE = {}
 
-"""Creates rainbow table using H() and R() with ROWS of CHAIN_LENGTH in CSV_FILE
+"""Creates rainbow table using H() and R() with ROWS of CHAIN_LENGTH hashes in CSV_FILE
 Precondition: To expand, input number of rows as param expand
 """
 def create_rainbow_table(expandRows=None):
@@ -90,16 +91,15 @@ def crack(hashedPassword, reloadTable=False):
     print("Cracking hash...")
     startTime = time.time()
 
-    for col in range(CHAIN_LENGTH):
+    for startCol in range(CHAIN_LENGTH-1, -1, -1):
         candidate = hashedPassword
-        for column in range(col, CHAIN_LENGTH):
-            if candidate in RAINBOW_TABLE:
-                traversalResult = traverse_chain(hashedPassword, RAINBOW_TABLE[candidate])
-                if traversalResult:
-                    print("Done cracking in {0} secs.".format(time.time() - startTime))
-                    return traversalResult
-
-            candidate = H(R(candidate, column))
+        for col in range(startCol, CHAIN_LENGTH):
+            candidate = H(R(candidate, col-1))
+        if candidate in RAINBOW_TABLE:
+            traversalResult = traverse_chain(hashedPassword, RAINBOW_TABLE[candidate])
+            if traversalResult:
+                print("Done cracking in {0} secs.".format(time.time() - startTime))
+                return traversalResult
 
 """Traverses a chain in the table to find the plaintext password once we've found a possible one
 Postcondition: Returns plaintext password if successful; otherwise returns None
@@ -146,6 +146,6 @@ def test(password=""):
 
     cracked = crack(H(password))
     if cracked:
-        print("Cracked password: {0}".format(cracked))
+        print("Success! Password: {0}".format(cracked))
     else:
         print("Unsuccessful :(")
