@@ -6,6 +6,10 @@ Jialin Ding (jding09@stanford.edu) and Charles Lu (charleslu@stanford.edu)
 CS 55N Autumn 2014 with Dan Boneh
 ----------------------------------------------------------------------------
 Contains functionality to create a rainbow table and crack a hash for 6-digit lowercase passwords.
+----------------------------------------------------------------------------
+With a randomly generated rainbow table of 3 million rows and 1000 chain length, 
+around 80% of passwords can be cracked, with an average time per password
+(including failures) at 3 seconds.
 """
 
 # Use Python 3
@@ -142,10 +146,24 @@ def test(password=""):
         for _ in range(6):
             password += random.choice(string.ascii_lowercase)
 
-    print("Cracking password: {0}\nH(password): {1}".format(password, H(password)))
+    print("\nCracking password: {0}\nH(password): {1}".format(password, H(password)))
 
     cracked = crack(H(password))
     if cracked:
         print("Success! Password: {0}".format(cracked))
+        return True
     else:
         print("Unsuccessful :(")
+        return False
+
+# Tests random passwords multiple times and prints success rate and average crack time. 
+def bulk_test(numHashes):
+    start = time.time()
+    numSuccess = 0
+
+    for i in range(numHashes):
+        numSuccess += test()
+
+    print("""\n{0} out of {1} random hashes were successful!\n
+          Average time per password (including failures): {2} secs.""" \
+        .format(numSuccess, numHashes, (time.time() - start) / numHashes))
