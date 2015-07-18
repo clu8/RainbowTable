@@ -1,4 +1,3 @@
-import random
 import csv
 import pickle
 import os
@@ -8,10 +7,11 @@ import time
 CSV_FIELDNAMES = ['start_point', 'endpoint_hash']
 
 class RainbowTable:
-	def __init__(self, hash_function, reduction_function, chain_length=1000):
+	def __init__(self, hash_function, reduction_function, gen_password_function, chain_length=1000):
 		self.table = {}
 		self.H = hash_function
 		self.R = reduction_function
+		self.G = gen_password_function
 		self.chain_length = chain_length
 
 	"""Generates rainbow table using H() and R() with rows of chain_length hashes, 
@@ -20,18 +20,13 @@ class RainbowTable:
 	def generate(self, pickle_file="RainbowTable.pickle", rows=3*10**6, extend=False):
 		startTime = time.time()
 		if not extend:
-			if input("Are you sure? This will overwrite any existing table. (y/n) ") != "y":
-				return
-
 			self.table = {}
 
 		for i in range(rows):
 			if i % 1000 == 0:
 				print(i)
 
-			start = ""
-			for _ in range(6):
-				start += random.choice(string.ascii_lowercase)
+			start = self.G()
 
 			plainText = start
 			for col in range(self.chain_length):
